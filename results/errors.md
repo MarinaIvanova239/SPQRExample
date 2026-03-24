@@ -4,12 +4,10 @@
 
 Пример sql запроса 
 ```
-    BEGIN;
     SELECT * FROM ENTITIES ENT
     WHERE ENT.CREATED_AT >= date '2026-03-22' AND ENT.CREATED_AT < date '2026-03-25'
     ORDER BY UPDATED_AT DESC
     LIMIT 2 OFFSET 0;
-    COMMIT;
 ```
 
 Результат
