@@ -58,7 +58,7 @@ Caused by: java.net.SocketException: Broken pipe
         
     SELECT SCENARIO_ID, CREATED_AT, NAME
     FROM ENTITY_SCENARIOS
-    WHERE SCENARIO_ID = 'sc-id';
+    WHERE SCENARIO_ID = 'scenario-1';
     
     INSERT INTO ENTITIES(
         ENTITY_ID,
