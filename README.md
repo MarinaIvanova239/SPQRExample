@@ -10,6 +10,8 @@
   - src/main/java/org/example/spqr/rest - классы для обработки rest запросов
   - src/main/java/org/example/spqr/sql - классы для работы с БД
   - src/main/java/org/example/spqr/WebApp - Main Class для запуска приложения
+- results
+    - errors.md - описание основных ошибок со стектрейсами
 
 ## Основные запросы
 

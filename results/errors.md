@@ -2,6 +2,16 @@
 
 1. Мультишардовые select'ы (например GET /entities?limit=2&offset=0)
 
+Пример sql запроса 
+```
+    SELECT *
+    FROM ENTITIES ENT
+    WHERE ENT.CREATED_AT >= date '2026-03-22' AND ENT.CREATED_AT < date '2026-03-25'
+    ORDER BY UPDATED_AT DESC
+    LIMIT 2 OFFSET 0;
+```
+
+Результат
 ```
     org.postgresql.util.PSQLException: ERROR: multishard state is out of sync
     at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2875) ~[postgresql-42.7.10.jar:42.7.10]
@@ -35,6 +45,34 @@ Caused by: java.net.SocketException: Broken pipe
 
 2. Мультишардовые операции в одной транзакции (select, insert в разные шарды + select из референсной таблицы)
 
+
+```
+    SELECT ENT.ENTITY_ID, ENT.STATE_ID
+    FROM ENTITIES ENT
+    LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+    WHERE ENT.ENTITY_ID IN ('e1', 'e2')
+        AND ENT.CREATED_AT >= date '2026-03-22'
+        AND ENT.CREATED_AT < date '2026-03-25';
+        
+    SELECT SCENARIO_ID, CREATED_AT, NAME
+    FROM ENTITY_SCENARIOS
+    WHERE SCENARIO_ID = 'sc-id';
+    
+    INSERT INTO ENTITIES(
+        ENTITY_ID,
+        CREATED_AT,
+        STATE_ID,
+        UPDATED_AT,
+        SCENARIO_ID
+    ) VALUES (
+        'entity-1',
+        '2026-03-24 14:30:00',
+        1,
+        '2026-03-24 14:30:00',
+        'scenario-1'
+    );
+```
+
 ```
 ### SQL: SELECT                   SCENARIO_ID,         CREATED_AT,         NAME     FROM ENTITY_SCENARIOS         WHERE SCENARIO_ID = ?
 ### Cause: org.postgresql.util.PSQLException: ERROR: multishard state is out of sync
@@ -45,6 +83,14 @@ org.postgresql.util.PSQLException: ERROR: multishard state is out of sync
 ```
 
 3. Несколько insert'ов в одной транзакции (даже в один шард)
+
+```
+INSERT INTO DELIVERIES(SUBSCRIPTION_ID, ENTITY_ID, ENTITY_CREATED_AT, DELIVERED_AT)
+VALUES('subs-1', 'entity-1', '2026-03-24 12:46:00', '2026-03-24 14:30:00');
+INSERT INTO DELIVERIES(SUBSCRIPTION_ID, ENTITY_ID, ENTITY_CREATED_AT, DELIVERED_AT)
+VALUES('subs-2', 'entity-2', '2026-03-24 12:46:00', '2026-03-24 14:30:00');
+
+```
 
 ```
 Caused by: org.springframework.jdbc.UncategorizedSQLException: org.example.spqr.sql.mappers.DeliverySqlMapper.insert (batch index #1) failed. Cause: java.sql.BatchUpdateException: Batch entry 1 <unknown> was aborted: ERROR: extended xproto state out of sync  Call getNextException to see other errors in the batch.
