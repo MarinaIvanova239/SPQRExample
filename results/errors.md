@@ -52,7 +52,7 @@ Caused by: org.springframework.jdbc.UncategorizedSQLException: org.example.spqr.
     at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:96) ~[mybatis-spring-3.0.5.jar:3.0.5]
 ```
 
-4. Select при недоступности хотя бы одного из шардов
+4. Select в один шард при недоступности другого шарда
 
 ```
 org.postgresql.util.PSQLException: ERROR: shard sh2: failed to find primary within

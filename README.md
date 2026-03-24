@@ -4,9 +4,9 @@
 - files 
   - db_scr - таблицы, необходимые для работы
   - spqr - конфигурация роутера и дистрибьюшенов
-- proto-models - модуль с основными моделями
-- proto-rest-api - модуль с основной логикой
+- spqr-proto-service - приложение-прототип
   - src/main/java/org/example/spqr/config - классы конфигурации (в т.ч. SqlConfig - настройка подключения к БД)
+  - src/main/java/org/example/spqr/sql - классы с моделями
   - src/main/java/org/example/spqr/rest - классы для обработки rest запросов
   - src/main/java/org/example/spqr/sql - классы для работы с БД
   - src/main/java/org/example/spqr/WebApp - Main Class для запуска приложения
@@ -81,4 +81,10 @@
 
 - POST /activations/suspended?maxCount={maxCount} - активация не больше maxCount сущностей в статусе suspension, у которых истекло время ожидания ответа (activatedAt в ENTITIES)
 
-- POST /activations/conditional?entityId={entityId} - активация сущностей, у которых есть подписки на сущность с идентификатором entityId. Регистрируются доставки в таблицу DELIVERIES
+- POST /activations/conditional - активация сущностей, у которых есть подписки на сущность с идентификатором entityId. Регистрируются доставки в таблицу DELIVERIES
+
+```
+    {
+        "entityId": "ext-5"
+    }
+```
