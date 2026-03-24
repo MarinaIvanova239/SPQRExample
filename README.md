@@ -13,7 +13,7 @@
 
 ## Основные запросы
 
-- POST /entities - добавление новой сущности. Если preconditions не пустые, но по этим сущностям создаются подписки в таблице SUBSCRIPTIONS.
+- POST /entities - добавление новой сущности. Если preconditions не пустые, то по этим сущностям создаются подписки в таблице SUBSCRIPTIONS.
 
 ```
     {
@@ -79,6 +79,6 @@
     }
 ```
 
-- POST /activations/suspended?maxCount={maxCount} - активация сущностей в статусе suspension, у которых истекло время ожидания ответа (не больше maxCount)
+- POST /activations/suspended?maxCount={maxCount} - активация не больше maxCount сущностей в статусе suspension, у которых истекло время ожидания ответа (activatedAt в ENTITIES)
 
-- POST /activations/conditional?entityId={entityId} - активация сущностей, у которых есть подписки на сущность с идентификатором entityId
+- POST /activations/conditional?entityId={entityId} - активация сущностей, у которых есть подписки на сущность с идентификатором entityId. Регистрируются доставки в таблицу DELIVERIES
