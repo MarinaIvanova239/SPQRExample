@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.spqr.sql.sqlmappers.ActivationSqlMapper">
+    <resultMap id="entity" type="EntityDm">
+        <result property="entityId" column="ENTITY_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <result property="stateId" column="STATE_ID"/>
+        <result property="activatedAt" column="ACTIVATED_AT"/>
+        <result property="scenarioName" column="SCENARIO_NAME"/>
+        <result property="scenarioId" column="SCENARIO_ID"/>
+    </resultMap>
+
+    <sql id="entitiesColumns">
+        ENT.ENTITY_ID,
+        ENT.CREATED_AT,
+        ENT.UPDATED_AT,
+        ENT.ACTIVATED_AT,
+        ENT.STATE_ID,
+        ENT.SCENARIO_ID
+    </sql>
+    <sql id="scenarioColumns">
+        SCNR.NAME SCENARIO_NAME
+    </sql>
+
+    <select id="selectEntitiesWithExpiredActivatedAt" resultMap="org.example.spqr.sql.sqlmappers.ActivationSqlMapper.entity">
+        SELECT <include refid="entitiesColumns" />,
+               <include refid="scenarioColumns"/>
+        FROM ENTITIES ENT
+            LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+        WHERE ENT.ACTIVATED_AT &lt;= #{currentDate, jdbcType=TIMESTAMP}
+            AND ENT.STATE_ID = #{stateId, jdbcType=INTEGER}
+            AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+        ORDER BY ENT.ACTIVATED_AT, ENT.CREATED_AT
+        LIMIT #{maxCount, jdbcType=INTEGER}
+    </select>
+
+    <select id="selectBySearchSetAndStateId" resultMap="org.example.spqr.sql.sqlmappers.ActivationSqlMapper.entity">
+        SELECT <include refid="entitiesColumns" />,
+               <include refid="scenarioColumns"/>
+        FROM ENTITIES ENT
+            LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+        WHERE ENT.ENTITY_ID = #{searchSet.entityId, jdbcType=VARCHAR}
+            AND ENT.STATE_ID = #{stateId, jdbcType=INTEGER}
+            AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+    <select id="selectBySearchSet" resultMap="org.example.spqr.sql.sqlmappers.ActivationSqlMapper.entity">
+        SELECT <include refid="entitiesColumns" />,
+               <include refid="scenarioColumns"/>
+        FROM ENTITIES ENT
+            LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+        WHERE ENT.ENTITY_ID IN
+            <foreach item='entityId' index='index' collection='searchSet.entityIds' open='(' separator=',' close=')'>
+                #{entityId, jdbcType=VARCHAR}
+            </foreach>
+                AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+                AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+    <update id="updateActivatedAt">
+        UPDATE ENTITIES
+        SET ACTIVATED_AT = #{entity.activatedAt, jdbcType=TIMESTAMP}
+        WHERE ENTITY_ID = #{searchSet.entityId, jdbcType=VARCHAR}
+          AND CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+          AND CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </update>
+</mapper>

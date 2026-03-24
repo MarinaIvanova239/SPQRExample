@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spqr.sql.sqlmappers.SubscriptionSqlMapper">
+
+    <resultMap id="subscription" type="SubscriptionDm">
+        <result property="entityId" column="ENTITY_ID"/>
+        <result property="entityCreatedAt" column="ENTITY_CREATED_AT"/>
+        <result property="subscriberInfo" column="SUBSCRIBER_INFO"/>
+        <result property="subscriptionId" column="SUBSCRIPTION_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+    </resultMap>
+
+    <sql id="subscriptionColumns">
+        ENTITY_ID,
+        ENTITY_CREATED_AT,
+        SUBSCRIBER_INFO,
+        SUBSCRIPTION_ID,
+        CREATED_AT
+    </sql>
+
+    <insert id="insert">
+        INSERT
+        INTO SUBSCRIPTIONS(<include refid="subscriptionColumns"/>)
+        VALUES(
+        #{entityId, jdbcType=VARCHAR},
+        #{entityCreatedAt, jdbcType=TIMESTAMP},
+        #{subscriberInfo, jdbcType=VARCHAR},
+        #{subscriptionId, jdbcType=VARCHAR},
+        #{createdAt, jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <select id="selectBySearchSet" resultMap="subscription">
+        SELECT
+        <include refid="subscriptionColumns"/>
+        FROM SUBSCRIPTIONS
+        WHERE ENTITY_ID = #{searchSet.entityId, jdbcType=VARCHAR}
+            AND ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+</mapper>

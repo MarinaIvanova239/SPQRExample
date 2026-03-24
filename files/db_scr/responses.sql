@@ -1,0 +1,8 @@
+CREATE TABLE RESPONSES
+(
+    REQUEST_ID              VARCHAR(512) NOT NULL,
+    CREATED_AT              TIMESTAMP(6) NOT NULL,
+    ENTITY_ID               VARCHAR(512) NOT NULL,
+    ENTITY_CREATED_AT       TIMESTAMP(6) NOT NULL,
+    BODY                    TEXT
+);

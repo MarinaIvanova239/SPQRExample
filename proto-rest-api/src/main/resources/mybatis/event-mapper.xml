@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spqr.sql.sqlmappers.EventSqlMapper">
+
+    <resultMap id="event" type="EventDm">
+        <result property="entityId" column="ENTITY_ID"/>
+        <result property="entityCreatedAt" column="ENTITY_CREATED_AT"/>
+        <result property="eventName" column="NAME"/>
+        <result property="registeredAt" column="REGISTERED_AT"/>
+    </resultMap>
+
+    <sql id="eventColumns">
+        ENTITY_ID,
+        ENTITY_CREATED_AT,
+        NAME,
+        REGISTERED_AT
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO ACTIVATION_EVENTS (
+            ENTITY_ID,
+            ENTITY_CREATED_AT,
+            NAME,
+            REGISTERED_AT
+        ) VALUES (
+            #{entityId, jdbcType=VARCHAR},
+            #{entityCreatedAt, jdbcType=TIMESTAMP},
+            #{eventName, jdbcType=VARCHAR},
+            #{registeredAt, jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <select id="selectByEntitiesSearchSet" resultMap="org.example.spqr.sql.sqlmappers.EventSqlMapper.event">
+        SELECT <include refid="eventColumns" />
+        FROM ACTIVATION_EVENTS
+        WHERE ENTITY_ID IN
+            <foreach item='element' index='index' collection='searchSet.entityIds' open='(' separator=',' close=')'>
+                #{element, jdbcType=VARCHAR}
+            </foreach>
+            AND ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+    <select id="selectLatestByEntities" resultMap="org.example.spqr.sql.sqlmappers.EventSqlMapper.event">
+        SELECT <include refid="eventColumns" />
+        FROM ACTIVATION_EVENTS e1
+        INNER JOIN
+            (SELECT ENTITY_ID ENT_ID, MAX(REGISTERED_AT) REG_AT
+            FROM ACTIVATION_EVENTS
+            INNER JOIN
+            <foreach item='element' index='index' collection='searchSet.entityIds' open='(values ' separator=',' close=')'>
+                (#{element, jdbcType=VARCHAR})
+            </foreach>
+            VALS(id) ON ENTITY_ID = id
+            AND ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+            GROUP BY ENTITY_ID) e2
+        ON (e1.ENTITY_ID = e2.ENT_ID
+            AND e1.REGISTERED_AT = e2.REG_AT
+            AND ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}')
+    </select>
+</mapper>

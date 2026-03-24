@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spqr.sql.sqlmappers.EntitySqlMapper">
+
+    <resultMap id="entity" type="EntityDm">
+        <result property="entityId" column="ENTITY_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="activatedAt" column="ACTIVATED_AT"/>
+        <result property="stateId" column="STATE_ID"/>
+        <result property="updatedAt" column="UPDATED_AT"/>
+        <result property="scenarioId" column="SCENARIO_ID"/>
+        <result property="scenarioName" column="SCENARIO_NAME"/>
+    </resultMap>
+
+    <sql id="entitiesColumns">
+        ENT.ENTITY_ID,
+        ENT.CREATED_AT,
+        ENT.UPDATED_AT,
+        ENT.ACTIVATED_AT,
+        ENT.STATE_ID,
+        ENT.SCENARIO_ID
+    </sql>
+    <sql id="scenarioColumns">
+        SCNR.NAME SCENARIO_NAME
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO ENTITIES(
+           ENTITY_ID,
+           CREATED_AT,
+           STATE_ID,
+           UPDATED_AT,
+           SCENARIO_ID
+        ) VALUES (
+           #{entityId, jdbcType=VARCHAR},
+           #{createdAt, jdbcType=TIMESTAMP},
+           #{stateId, jdbcType=SMALLINT},
+           #{updatedAt, jdbcType=TIMESTAMP},
+           #{scenarioId, jdbcType=VARCHAR}
+        )
+    </insert>
+
+    <update id="update">
+        WITH ENTITY_ROW_IDS AS (
+            SELECT TABLEOID, CTID
+            FROM ENTITIES
+            WHERE ENTITY_ID = #{searchSet.entityId, jdbcType=VARCHAR}
+                AND UPDATED_AT = #{searchSet.updateTime, jdbcType=TIMESTAMP}
+                AND CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+                AND CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+                ORDER BY CTID
+                LIMIT 1
+            )
+        UPDATE ENTITIES ENT
+        <set>
+            <if test="changeset.statusUpdated == true">
+                STATE_ID = #{changeset.stateId, jdbcType=SMALLINT},
+                UPDATED_AT = #{changeset.updatedAt, jdbcType=TIMESTAMP},
+            </if>
+            <if test="changeset.activatedAtUpdated == true">
+                ACTIVATED_AT = #{changeset.activatedAt, jdbcType=TIMESTAMP}
+            </if>
+        </set>
+        FROM ENTITY_ROW_IDS
+        WHERE ENT.CTID = ENTITY_ROW_IDS.CTID
+            AND ENT.TABLEOID = ENTITY_ROW_IDS.TABLEOID
+            AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </update>
+
+    <select id="selectByIds" resultMap="org.example.spqr.sql.sqlmappers.EntitySqlMapper.entity">
+        SELECT <include refid="entitiesColumns" />,
+        <include refid="scenarioColumns"/>
+        FROM ENTITIES ENT
+        LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+        WHERE ENT.ENTITY_ID IN
+        <foreach item='entityId' index='index' collection='searchSet.entityIds' open='(' separator=',' close=')'>
+            #{entityId, jdbcType=VARCHAR}
+        </foreach>
+        AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+        AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+    <select id="isEntityExists" resultType="boolean">
+        SELECT EXISTS(SELECT 1
+            FROM ENTITIES ENT
+            WHERE ENT.ENTITY_ID = #{searchSet.entityId, jdbcType=VARCHAR}
+                AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+                AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}')
+    </select>
+
+    <select id="selectLastUpdated" resultMap="org.example.spqr.sql.sqlmappers.EntitySqlMapper.entity">
+        SELECT <include refid="entitiesColumns"/>
+        FROM ENTITIES ENT
+        WHERE UPDATED_AT >= #{searchSet.startSearchTime, jdbcType=TIMESTAMP}
+            AND ENT.CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+            AND ENT.CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+        ORDER BY UPDATED_AT DESC
+        LIMIT #{bounds.limit, jdbcType=INTEGER}
+        OFFSET #{bounds.offset, jdbcType=INTEGER}
+    </select>
+</mapper>

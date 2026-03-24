@@ -1,0 +1,59 @@
+---
+log_level: debug
+
+host: '0.0.0.0'
+router_port: '6432'
+router_ro_port: '6433'
+admin_console_port: '7432'
+grpc_api_port: '7000'
+
+show_notice_messages: true
+pgproto_debug: true
+
+router_mode: PROXY
+
+default_commit_strategy: best-effort
+
+query_routing:
+  default_route_behaviour: ALLOW
+  enhanced_multishard_processing: true
+
+frontend_tls:
+  sslmode: disable
+
+frontend_rules:
+  - usr: test
+    db: testdb
+    pool_mode: TRANSACTION
+    pool_prepared_statement: true
+    auth_rule:
+      auth_method: ok
+      password: strong
+  - pool_mode: TRANSACTION
+    pool_default: true
+    pool_prepared_statement: false
+    auth_rule:
+      auth_method: ok
+
+backend_rules:
+  - usr:                test
+    db:                 testdb
+    pool_discard:       false
+    pool_rollback:      true
+    connection_timeout: 1m
+    keep_alive:         1m
+    tcp_user_timeout:   1m
+    connection_limit:   50
+    auth_rule:
+      auth_method: cleartext
+      password:    test
+
+shards:
+  sh1:
+    type: DATA
+    hosts:
+      - 'localhost:5432'
+  sh2:
+    type: DATA
+    hosts:
+      - 'localhost:5433'

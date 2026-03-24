@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spqr.sql.sqlmappers.DeliverySqlMapper">
+
+    <resultMap id="delivery" type="DeliveryDm">
+        <result property="entityId" column="ENTITY_ID"/>
+        <result property="entityCreatedAt" column="ENTITY_CREATED_AT"/>
+        <result property="deliveredAt" column="DELIVERED_AT"/>
+        <result property="subscriptionId" column="SUBSCRIPTION_ID"/>
+    </resultMap>
+
+    <sql id="deliveryColumns">
+        SUBSCRIPTION_ID,
+        ENTITY_ID,
+        ENTITY_CREATED_AT,
+        DELIVERED_AT
+    </sql>
+
+    <insert id="insert">
+        INSERT
+        INTO DELIVERIES(<include refid="deliveryColumns"/>)
+        VALUES(
+        #{subscriptionId, jdbcType=VARCHAR},
+        #{entityId, jdbcType=VARCHAR},
+        #{entityCreatedAt, jdbcType=TIMESTAMP},
+        #{deliveredAt, jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+</mapper>

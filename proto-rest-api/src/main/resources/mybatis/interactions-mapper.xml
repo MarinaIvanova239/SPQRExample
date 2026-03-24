@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spqr.sql.sqlmappers.InteractionSqlMapper">
+
+    <resultMap id="response" type="ResponseDm">
+        <id property="requestId" column="RS_REQUEST_ID"/>
+        <result property="createdAt" column="RS_CREATED_AT"/>
+        <result property="body" column="RS_BODY"/>
+        <result property="entityId" column="RS_ENTITY_ID"/>
+        <result property="entityCreatedAt" column="RS_ENTITY_CREATED_AT"/>
+    </resultMap>
+
+    <resultMap id="request" type="RequestDm">
+        <id property="requestId" column="RQ_REQUEST_ID"/>
+        <result property="entityId" column="RQ_ENTITY_ID"/>
+        <result property="entityCreatedAt" column="RQ_ENTITY_CREATED_AT"/>
+        <result property="createdAt" column="RQ_CREATED_AT"/>
+    </resultMap>
+
+    <sql id="requestColumns">
+        rq.ENTITY_ID RQ_ENTITY_ID,
+        rq.REQUEST_ID RQ_REQUEST_ID,
+        rq.ENTITY_CREATED_AT RQ_ENTITY_CREATED_AT,
+        rq.CREATED_AT RQ_CREATED_AT
+    </sql>
+
+    <sql id="responseColumns">
+        rs.REQUEST_ID RS_REQUEST_ID,
+        rs.CREATED_AT RS_CREATED_AT,
+        rs.BODY RS_BODY,
+        rs.ENTITY_ID RS_ENTITY_ID,
+        rs.ENTITY_CREATED_AT RS_ENTITY_CREATED_AT
+    </sql>
+
+    <insert id="insertRequest">
+        INSERT INTO REQUESTS (
+            REQUEST_ID,
+            ENTITY_ID,
+            CREATED_AT,
+            ENTITY_CREATED_AT
+        ) VALUES (
+            #{requestId, jdbcType=VARCHAR},
+            #{entityId, jdbcType=VARCHAR},
+            #{createdAt, jdbcType=TIMESTAMP},
+            #{entityCreatedAt, jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <insert id="insertResponse">
+        INSERT INTO RESPONSES (
+            REQUEST_ID,
+            CREATED_AT,
+            BODY,
+            ENTITY_ID,
+            ENTITY_CREATED_AT
+        ) VALUES (
+            #{requestId, jdbcType=VARCHAR},
+            #{createdAt, jdbcType=TIMESTAMP},
+            #{body, jdbcType=VARCHAR},
+            #{entityId, jdbcType=VARCHAR},
+            #{entityCreatedAt, jdbcType=TIMESTAMP}
+        )
+    </insert>
+
+    <select id="selectResponsesBySearchSet" resultMap="response">
+        SELECT <include refid="responseColumns"/>
+        FROM RESPONSES rs
+        WHERE EXISTS (
+                SELECT 1
+                FROM REQUESTS rq
+                WHERE sr.ENTITY_ID = #{searchSet.entityId, jdbcType=VARCHAR}
+                    AND rq.REQUEST_ID = rs.REQUEST_ID
+                    AND rq.ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+                    AND rq.ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+                )
+                AND rs.ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+                AND rs.ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+    <select id="selectRequestsByIdAndSearchSet" resultMap="request">
+        SELECT <include refid="requestColumns"/>
+        FROM REQUESTS rq
+        WHERE rq.REQUEST_ID = #{requestId, jdbcType=VARCHAR}
+        AND rq.ENTITY_CREATED_AT >= date '${searchSet.partitionLowerBoundaryDate}'
+        AND rq.ENTITY_CREATED_AT &lt; date '${searchSet.partitionUpperBoundaryDate}'
+    </select>
+
+</mapper>

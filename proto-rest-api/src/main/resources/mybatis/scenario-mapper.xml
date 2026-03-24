@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.spqr.sql.sqlmappers.ScenarioSqlMapper">
+
+    <resultMap id="scenario" type="ScenarioDm">
+        <result property="id" column="SCENARIO_ID"/>
+        <result property="createdAt" column="CREATED_AT"/>
+        <result property="name" column="NAME"/>
+    </resultMap>
+
+    <sql id="scenarioColumns">
+        SCENARIO_ID,
+        CREATED_AT,
+        NAME
+    </sql>
+
+    <insert id="insert">
+        INSERT
+        INTO ENTITY_SCENARIOS(<include refid="scenarioColumns"/>)
+        VALUES(
+        #{scenario.id, jdbcType=VARCHAR},
+        #{scenario.createdAt, jdbcType=TIMESTAMP},
+        #{scenario.name, jdbcType=VARCHAR}
+        ) ON CONFLICT DO NOTHING
+    </insert>
+
+    <select id="selectByScenarioId" resultMap="scenario">
+        SELECT
+        <include refid="scenarioColumns"/>
+        FROM ENTITY_SCENARIOS
+        WHERE SCENARIO_ID = #{scenarioId, jdbcType=VARCHAR}
+    </select>
+
+</mapper>
