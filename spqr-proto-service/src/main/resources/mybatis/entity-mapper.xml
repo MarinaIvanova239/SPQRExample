@@ -74,7 +74,7 @@
         SELECT <include refid="entitiesColumns" />,
         <include refid="scenarioColumns"/>
         FROM ENTITIES ENT
-        LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+        LEFT OUTER JOIN ENTITY_SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
         WHERE ENT.ENTITY_ID IN
         <foreach item='entityId' index='index' collection='searchSet.entityIds' open='(' separator=',' close=')'>
             #{entityId, jdbcType=VARCHAR}

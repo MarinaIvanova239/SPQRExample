@@ -4,11 +4,12 @@
 
 Пример sql запроса 
 ```
-    SELECT *
-    FROM ENTITIES ENT
+    BEGIN;
+    SELECT * FROM ENTITIES ENT
     WHERE ENT.CREATED_AT >= date '2026-03-22' AND ENT.CREATED_AT < date '2026-03-25'
     ORDER BY UPDATED_AT DESC
     LIMIT 2 OFFSET 0;
+    COMMIT;
 ```
 
 Результат
@@ -47,9 +48,10 @@ Caused by: java.net.SocketException: Broken pipe
 
 
 ```
-    SELECT ENT.ENTITY_ID, ENT.STATE_ID
+    BEGIN;
+    SELECT ENT.ENTITY_ID, ENT.STATE_ID, SCNR.NAME
     FROM ENTITIES ENT
-    LEFT OUTER JOIN SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
+    LEFT OUTER JOIN ENTITY_SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
     WHERE ENT.ENTITY_ID IN ('e1', 'e2')
         AND ENT.CREATED_AT >= date '2026-03-22'
         AND ENT.CREATED_AT < date '2026-03-25';
@@ -71,6 +73,7 @@ Caused by: java.net.SocketException: Broken pipe
         '2026-03-24 14:30:00',
         'scenario-1'
     );
+    COMMIT;
 ```
 
 ```
@@ -85,10 +88,12 @@ org.postgresql.util.PSQLException: ERROR: multishard state is out of sync
 3. Несколько insert'ов в одной транзакции (даже в один шард)
 
 ```
-INSERT INTO DELIVERIES(SUBSCRIPTION_ID, ENTITY_ID, ENTITY_CREATED_AT, DELIVERED_AT)
-VALUES('subs-1', 'entity-1', '2026-03-24 12:46:00', '2026-03-24 14:30:00');
-INSERT INTO DELIVERIES(SUBSCRIPTION_ID, ENTITY_ID, ENTITY_CREATED_AT, DELIVERED_AT)
-VALUES('subs-2', 'entity-2', '2026-03-24 12:46:00', '2026-03-24 14:30:00');
+    BEGIN;
+    INSERT INTO DELIVERIES(SUBSCRIPTION_ID, ENTITY_ID, ENTITY_CREATED_AT, DELIVERED_AT)
+    VALUES('subs-1', 'entity-1', '2026-03-24 12:46:00', '2026-03-24 14:30:00');
+    INSERT INTO DELIVERIES(SUBSCRIPTION_ID, ENTITY_ID, ENTITY_CREATED_AT, DELIVERED_AT)
+    VALUES('subs-2', 'entity-2', '2026-03-24 12:46:00', '2026-03-24 14:30:00');
+    COMMIT;
 
 ```
 

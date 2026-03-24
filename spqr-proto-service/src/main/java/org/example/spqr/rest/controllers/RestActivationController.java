@@ -2,7 +2,6 @@ package org.example.spqr.rest.controllers;
 
 import lombok.NoArgsConstructor;
 import org.example.spqr.models.rq.EntityIdRq;
-import org.example.spqr.models.rq.EntityIdsRq;
 import org.example.spqr.rest.service.EntityService;
 import org.example.spqr.models.rs.EntityRs;
 import org.springframework.beans.factory.annotation.Autowired;
