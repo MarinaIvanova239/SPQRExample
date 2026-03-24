@@ -50,13 +50,16 @@ Caused by: java.net.SocketException: Broken pipe
     SELECT ENT.ENTITY_ID, ENT.STATE_ID, SCNR.NAME
     FROM ENTITIES ENT
     LEFT OUTER JOIN ENTITY_SCENARIOS SCNR ON SCNR.SCENARIO_ID = ENT.SCENARIO_ID
-    WHERE ENT.ENTITY_ID IN ('e1', 'e2')
+    WHERE ENT.ENTITY_ID IN ('entity-1')
         AND ENT.CREATED_AT >= date '2026-03-22'
         AND ENT.CREATED_AT < date '2026-03-25';
         
+    INSERT INTO SUBSCRIPTIONS(ENTITY_ID, ENTITY_CREATED_AT, SUBSCRIBER_INFO, SUBSCRIPTION_ID, CREATED_AT)
+    VALUES('entity-1', '2026-03-24 11:12:32', '{ "entityId": "entity-2" }', 'subs-5', '2026-03-24 14:30:00');
+        
     SELECT SCENARIO_ID, CREATED_AT, NAME
     FROM ENTITY_SCENARIOS
-    WHERE SCENARIO_ID = 'scenario-1';
+    WHERE SCENARIO_ID = 'scenario-2';
     
     INSERT INTO ENTITIES(
         ENTITY_ID,
@@ -65,11 +68,11 @@ Caused by: java.net.SocketException: Broken pipe
         UPDATED_AT,
         SCENARIO_ID
     ) VALUES (
-        'entity-1',
+        'entity-2',
         '2026-03-24 14:30:00',
         1,
         '2026-03-24 14:30:00',
-        'scenario-1'
+        'scenario-2'
     );
     COMMIT;
 ```
