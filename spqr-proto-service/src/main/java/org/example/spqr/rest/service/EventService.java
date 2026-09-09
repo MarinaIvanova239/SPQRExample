@@ -49,8 +49,8 @@ public class EventService {
     }
 
     public Map<String, EventRs> addEvents(Map<String, EventRq> entity2Events) {
-        List<Entity> entities = activationDao.getByEntityIds(new ArrayList<>(entity2Events.keySet()));
         Map<String, Event> result = transactionOperations.execute(status -> {
+            List<Entity> entities = activationDao.getByEntityIds(new ArrayList<>(entity2Events.keySet()));
             Map<String, List<Event>> actualEvents = eventDao.getByEntities(entities);
             Map<String, Event> missingEvents = entity2Events.entrySet()
                     .stream()
