@@ -1,0 +1,51 @@
+services:
+  spqr-router-simple:
+    image: pgsharding/spqr-router:latest
+    ports:
+      - "6432:6432" #router_port
+      - "6433:6433" #router_ro_port
+      - "7432:7432" #admin_console_port
+      - "7010:7010" #grpc_api_port
+    hostname: spqr_router_simple
+    container_name: spqr_router_simple
+    volumes:
+      - ./spqr/router.yaml:/etc/spqr/router.yaml:ro
+      - ./spqr/init.sql:/etc/spqr/init.sql:ro
+    depends_on:
+      - shard1
+      - shard2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  shard1:
+    image: 'bitnami/postgresql:16'
+    hostname: spqr_pg_shard1
+    container_name: spqr_pg_shard1
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user1 -d db1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  shard2:
+    image: 'bitnami/postgresql:16'
+    hostname: spqr_pg_shard2
+    container_name: spqr_pg_shard2
+    ports:
+      - '5433:5432'
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: testdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user1 -d db1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5

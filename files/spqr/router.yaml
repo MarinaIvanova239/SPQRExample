@@ -11,12 +11,17 @@ show_notice_messages: true
 pgproto_debug: true
 
 router_mode: PROXY
+maintain_params: true
 
 default_commit_strategy: best-effort
 
 query_routing:
   default_route_behaviour: ALLOW
   enhanced_multishard_processing: true
+
+init_sql: "/etc/spqr/init.sql"
+use_init_sql: true
+exit_on_init_sql: true
 
 frontend_tls:
   sslmode: disable
