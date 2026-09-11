@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -27,7 +28,7 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = WebApp.class)
 @ActiveProfiles("test")
 public class EventsRegistrationTest {
 
@@ -80,11 +81,11 @@ public class EventsRegistrationTest {
         suspension.setEntityIds(List.of(entityRq1.getEntityId(), entityRq2.getEntityId()));
         HttpEntity<EntityIdsRq> httpSuspension = new HttpEntity<>(suspension, headers);
         // and
-        ResponseEntity<EntityRs> suspendedEntities = restTemplate.exchange(
+        ResponseEntity<List<EntityRs>> suspendedEntities = restTemplate.exchange(
                 "http://localhost:" + port + "/suspensions",
-                HttpMethod.POST,
+                HttpMethod.PUT,
                 httpSuspension,
-                EntityRs.class
+                new ParameterizedTypeReference<List<EntityRs>>() {}
         );
         assertThat(suspendedEntities.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
         // and
