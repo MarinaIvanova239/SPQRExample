@@ -1,6 +1,7 @@
 services:
   spqr-router-simple:
-    image: pgsharding/spqr-router:latest
+    image: pgsharding/spqr-router:nightly
+    user: "0:0"
     ports:
       - "6432:6432" #router_port
       - "6433:6433" #router_ro_port
@@ -20,32 +21,38 @@ services:
       timeout: 5s
       retries: 5
   shard1:
-    image: 'bitnami/postgresql:16'
+    image: 'postgres:15-alpine'
     hostname: spqr_pg_shard1
     container_name: spqr_pg_shard1
+    user: "0:0"
     ports:
       - '5432:5432'
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
       POSTGRES_DB: testdb
+    volumes:
+      - ./db_scr:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user1 -d db1"]
+      test: ["CMD-SHELL", "pg_isready -U test -d testdb"]
       interval: 5s
       timeout: 5s
       retries: 5
   shard2:
-    image: 'bitnami/postgresql:16'
+    image: 'postgres:15-alpine'
     hostname: spqr_pg_shard2
     container_name: spqr_pg_shard2
+    user: "0:0"
     ports:
       - '5433:5432'
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
       POSTGRES_DB: testdb
+    volumes:
+      - ./db_scr:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user1 -d db1"]
+      test: ["CMD-SHELL", "pg_isready -U test -d testdb"]
       interval: 5s
       timeout: 5s
       retries: 5

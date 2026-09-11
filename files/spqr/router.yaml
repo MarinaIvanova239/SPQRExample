@@ -34,11 +34,6 @@ frontend_rules:
     auth_rule:
       auth_method: ok
       password: strong
-  - pool_mode: TRANSACTION
-    pool_default: true
-    pool_prepared_statement: false
-    auth_rule:
-      auth_method: ok
 
 backend_rules:
   - usr:                test
