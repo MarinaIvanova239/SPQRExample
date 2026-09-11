@@ -101,4 +101,9 @@
         LIMIT #{bounds.limit, jdbcType=INTEGER}
         OFFSET #{bounds.offset, jdbcType=INTEGER}
     </select>
+
+    <select id="deleteById">
+        DELETE FROM ENTITIES
+        WHERE ENTITY_ID = #{entityId, jdbcType=VARCHAR}
+    </select>
 </mapper>

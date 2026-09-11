@@ -14,6 +14,8 @@ public interface EntityDao {
 
     Entity getById(String entityId);
 
+    void deleteById(String entityId);
+
     Entity getById(String externalId, int period);
 
     List<Entity> getPreconditionsByIds(List<String> entityIds);

@@ -54,6 +54,18 @@ public class EventsRegistrationTest {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         // and
+        var entityList = new EntityIdsRq();
+        entityList.setEntityIds(List.of(entityRq1.getEntityId(), entityRq2.getEntityId()));
+        HttpEntity<EntityIdsRq> httpEntityList = new HttpEntity<>(entityList, headers);
+        // and
+        ResponseEntity<EntityRs> deletedEntities = restTemplate.exchange(
+                "http://localhost:" + port + "/entities/delete",
+                HttpMethod.POST,
+                httpEntityList,
+                EntityRs.class
+        );
+        assertThat(deletedEntities.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        // and
         HttpEntity<EntityRq> httpRq1 = new HttpEntity<>(entityRq1, headers);
         HttpEntity<EntityRq> httpRq2 = new HttpEntity<>(entityRq2, headers);
         // and
@@ -77,14 +89,10 @@ public class EventsRegistrationTest {
         assertThat(created2.getStateId()).isEqualTo(EntityState.NEW.value());
 
         // when
-        var suspension = new EntityIdsRq();
-        suspension.setEntityIds(List.of(entityRq1.getEntityId(), entityRq2.getEntityId()));
-        HttpEntity<EntityIdsRq> httpSuspension = new HttpEntity<>(suspension, headers);
-        // and
         ResponseEntity<List<EntityRs>> suspendedEntities = restTemplate.exchange(
                 "http://localhost:" + port + "/suspensions",
                 HttpMethod.PUT,
-                httpSuspension,
+                httpEntityList,
                 new ParameterizedTypeReference<List<EntityRs>>() {}
         );
         assertThat(suspendedEntities.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(200));
@@ -128,7 +136,7 @@ public class EventsRegistrationTest {
         HttpEntity<Map<String, EventRq>> httpBulkEvent = new HttpEntity<>(bulkEvents);
         // and
         ResponseEntity<EntityRs> bulkEventsResponse = restTemplate.exchange(
-                "http://localhost:" + port + "/events/bulk",
+                "http://localhost:" + port + "/interactions/events/bulk",
                 HttpMethod.POST,
                 httpBulkEvent,
                 EntityRs.class

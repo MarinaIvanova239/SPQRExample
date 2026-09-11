@@ -111,7 +111,7 @@ public class SqlActivationDao implements ActivationDao {
         if (isEmpty(entityIds)) {
             return emptyList();
         }
-        LOG.trace("Select entities by ids: '{}'", entityIds);
+        LOG.info("Select entities by ids: '{}'", entityIds);
 
         final DateTime currentTime = now();
         EntitySearchSetDm.Builder searchSetBuilder = EntitySearchSetDm.builder()
@@ -128,7 +128,7 @@ public class SqlActivationDao implements ActivationDao {
                                 .stream();
                     })
                     .collect(toList());
-            LOG.trace("Selected entities: '{}'", entities);
+            LOG.info("Selected entities: '{}'", entities);
             return entities;
         } catch (Exception e) {
             throw sqlExceptionMapper.toProtoException(e);

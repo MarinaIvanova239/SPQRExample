@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} %-5level [%thread{21}] %logger{40} : %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <logger name="org.example.spqr" level="INFO"/>
+
+    <root level="ERROR">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

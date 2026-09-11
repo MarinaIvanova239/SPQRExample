@@ -1,6 +1,7 @@
 package org.example.spqr.rest.controllers;
 
 import lombok.NoArgsConstructor;
+import org.example.spqr.models.rq.EntityIdsRq;
 import org.example.spqr.rest.service.EntityService;
 import org.example.spqr.models.rq.EntityRq;
 import org.example.spqr.models.rs.EntityRs;
@@ -56,5 +57,13 @@ public class RestEntitiesController {
         PageRs<EntityRs> foundEntities = entityService.getEntities(limit, offset);
         return ResponseEntity.ok()
                 .body(foundEntities);
+    }
+
+    @PostMapping(path = "/delete", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public ResponseEntity<Void> deleteEntities(@RequestBody EntityIdsRq requests) {
+        entityService.deleteEntities(requests);
+
+        return ResponseEntity.noContent()
+                .build();
     }
 }

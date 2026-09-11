@@ -105,6 +105,11 @@ public class SqlEntityDao implements EntityDao {
     }
 
     @Override
+    public void deleteById(String entityId) {
+        entitySqlMapper.deleteById(entityId);
+    }
+
+    @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public Entity getById(String entityId, int period) {
         DateTime minDate = now().dayOfMonth().roundFloorCopy().minusDays(period);

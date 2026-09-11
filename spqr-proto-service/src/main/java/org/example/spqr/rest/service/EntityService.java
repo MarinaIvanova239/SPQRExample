@@ -12,6 +12,7 @@ import org.example.spqr.models.domain.SubscriberInfo;
 import org.example.spqr.models.domain.Subscription;
 import org.example.spqr.exceptions.EntityNotFoundException;
 import org.example.spqr.exceptions.EntityContentionException;
+import org.example.spqr.models.rq.EntityIdsRq;
 import org.example.spqr.sql.retriever.PreconditionsRetriever;
 import org.example.spqr.rest.factories.SubscriptionFactory;
 import org.example.spqr.rest.mappers.Domain2ResponseMapper;
@@ -131,6 +132,12 @@ public class EntityService {
         List<Entity> entities = entityDao.getEntities(limit, offset);
         Page<Entity> page = new Page<>(entities, limit, offset);
         return domain2ResponseMapper.fromEntities(page);
+    }
+
+    public void deleteEntities(EntityIdsRq entities) {
+        for (String entityId: entities.getEntityIds()) {
+            entityDao.deleteById(entityId);
+        }
     }
 
     public List<EntityRs> suspendEntities(List<String> entityIds) {

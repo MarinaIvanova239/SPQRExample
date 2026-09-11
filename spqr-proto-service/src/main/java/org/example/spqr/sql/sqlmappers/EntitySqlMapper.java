@@ -15,6 +15,8 @@ public interface EntitySqlMapper extends FlushableSqlMapper {
 
     List<EntityDm> selectByIds(@Param("searchSet") EntitySearchSetDm searchSet);
 
+    void deleteById(@Param("entityId") String entityId);
+
     boolean isEntityExists(@Param("searchSet") EntitySearchSetDm searchSet);
 
     void update(
