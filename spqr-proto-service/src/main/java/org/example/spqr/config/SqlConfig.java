@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.apache.ibatis.mapping.VendorDatabaseIdProvider;
 import org.apache.ibatis.session.ExecutorType;
 import org.apache.ibatis.type.JdbcType;
+import org.example.spqr.sql.interceptors.NoticeInterceptor;
 import org.example.spqr.sql.transaction.SqlTransactionManager;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
@@ -73,6 +74,7 @@ public class SqlConfig {
         sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mybatis/*-mapper.xml"));
         sqlSessionFactoryBean.setConfigurationProperties(sqlDbConfigurationProperties);
         sqlSessionFactoryBean.setDatabaseIdProvider(databaseIdProvider);
+        sqlSessionFactoryBean.setPlugins(new NoticeInterceptor());
         return sqlSessionFactoryBean;
     }
 
