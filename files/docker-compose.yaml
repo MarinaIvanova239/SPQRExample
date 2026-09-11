@@ -16,7 +16,7 @@ services:
       - shard1
       - shard2
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432"]
+      test: ["CMD-SHELL", "pg_isready -h localhost -p 6432 -U test -d testdb"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -24,13 +24,13 @@ services:
     image: 'postgres:15-alpine'
     hostname: spqr_pg_shard1
     container_name: spqr_pg_shard1
-    user: "0:0"
     ports:
       - '5432:5432'
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
       POSTGRES_DB: testdb
+      PGPORT: 5432
     volumes:
       - ./db_scr:/docker-entrypoint-initdb.d
     healthcheck:
@@ -42,13 +42,13 @@ services:
     image: 'postgres:15-alpine'
     hostname: spqr_pg_shard2
     container_name: spqr_pg_shard2
-    user: "0:0"
     ports:
-      - '5433:5432'
+      - '5433:5433'
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: test
       POSTGRES_DB: testdb
+      PGPORT: 5433
     volumes:
       - ./db_scr:/docker-entrypoint-initdb.d
     healthcheck:
