@@ -4,6 +4,7 @@
 - files 
   - db_scr - таблицы, необходимые для работы
   - spqr - конфигурация роутера и дистрибьюшенов
+  - docker-compose.yaml - файл для запуска окружения (2 шарда + spqr роутер)
 - spqr-proto-service - приложение-прототип
   - src/main/java/org/example/spqr/config - классы конфигурации (в т.ч. SqlConfig - настройка подключения к БД)
   - src/main/java/org/example/spqr/sql - классы с моделями
@@ -11,6 +12,7 @@
   - src/main/java/org/example/spqr/sql - классы для работы с БД
   - src/main/java/org/example/spqr/WebApp - Main Class для запуска приложения
 - spqr-proto-tests - приложение с тестами прототипа
+  -  src/main/java/org/example/spqr/EventsRegistrationTest - тест на регистрацию событий
 - results
     - errors.md - описание основных ошибок со стектрейсами
 
